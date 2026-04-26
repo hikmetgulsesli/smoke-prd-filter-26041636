@@ -1,0 +1,29 @@
+[
+  {
+    "screenId": "c562b1969a4d4971a792bffbd10d49a4",
+    "title": "Ana Sayfa (Sayaç)",
+    "componentName": "AnaSayfaSayac",
+    "file": "src/screens/AnaSayfaSayac.tsx",
+    "buttons": 5,
+    "inputs": 0,
+    "links": 3
+  },
+  {
+    "screenId": "5f2b2e3d74a14b8599b9e0c685b6f5c3",
+    "title": "Hata Durumu",
+    "componentName": "HataDurumu",
+    "file": "src/screens/HataDurumu.tsx",
+    "buttons": 2,
+    "inputs": 0,
+    "links": 0
+  },
+  {
+    "screenId": "c73363ddc91244ca886ced4f18488b7b",
+    "title": "Bilgi Mesajı (Toast)",
+    "componentName": "BilgiMesajiToast",
+    "file": "src/screens/BilgiMesajiToast.tsx",
+    "buttons": 5,
+    "inputs": 0,
+    "links": 3
+  }
+]
