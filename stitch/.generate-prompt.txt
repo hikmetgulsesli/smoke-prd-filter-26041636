@@ -1,0 +1,244 @@
+# PRD — Smoke Sayaç Uygulaması (smoke-prd-filter-26041636)
+
+## 1. Genel Bakış
+
+Smoke Sayaç, kullanıcıların bir sayı değerini artırıp azaltabildiği, sıfırlayabildiği ve bu değerin tarayıcıda localStorage ile kalıcı olarak saklandığı minimal bir React uygulamasıdır. Proje, React 18 + Vite + TypeScript stack'inin temel yeteneklerini doğrulamak için tasarlanmış bir smoke test niteliğindedir. Hedef kitle: geliştirici kendi ortamını test etmek isteyen kişiler veya onboarding süreçlerinde hızlı bir başlangıç noktası arayan ekipler. Arayüz dili Türkçe'dir ve tüm etiketler, butonlar, hata mesajları Türkçe olarak sunulur.
+
+## 2. Hedefler
+
+- Kullanıcı mevcut sayı değerini birer birer artırabilmeli (Arttır butonu)
+- Kullanıcı mevcut sayı değerini birer birer azaltabilmeli (Azalt butonu)
+- Kullanıcı sayı değerini sıfırlayabilmeli (Sıfırla butonu — varsayılan değer 0)
+- Sayı değeri her değişiklikte otomatik olarak localStorage'a kaydedilmeli
+- Sayfa yenilendiğinde veya tarayıcı kapatılıp açıldığında son değer korunmalı
+- Uygulama tek bir ekranda tüm işlevselliği sunmalı, yönlendirme gerektirmemeli
+- İlk yükleme 2 saniyenin altında tamamlanmalı
+- Mobil ve masaüstü tarayıcılarda düzgün görüntülenmeli (responsive)
+- Klavye ile tam erişilebilirlik sağlanmalı (WCAG 2.1 AA)
+- Touch hedefleri minimum 44x44 piksel olmalı
+
+## 3. Tech Stack Detayı
+
+- **Framework:** React 18.x (useState, useEffect hooks)
+- **Build:** Vite 5.x — hızlı geliştirme sunucusu ve üretim build'i
+- **Styling:** CSS Modules — bileşen bazlı stillendirme, scoped class'lar
+- **State Management:** React useState + useEffect (localStorage senkronizasyonu)
+- **Storage:** localStorage API — değer string olarak saklanır (JSON.stringify/parse)
+- **Routing:** Yok — tek sayfa uygulaması
+- **Language:** TypeScript 5.x — tip güvenliği, any kullanılmaz
+- **Icons:** Lucide React — Arttır (Plus), Azalt (Minus), Sıfırla (RotateCcw) ikonları
+- **Testing/Dev:** local static server (npx serve dist) veya Vite dev sunucusu
+
+## 4. Fonksiyonel Gereksinimler
+
+### 4.1 Sayaç Değeri Gösterimi
+- Ekranın üst kısmında büyük ve okunaklı şekilde mevcut sayı değeri görüntülenir
+- Sayı negatif değer alabilir (sınır yok)
+- Sayı 0 ile başlar
+- Değer değiştiğinde animasyonsuz, anlık güncellenir
+
+### 4.2 Arttır İşlemi
+- Buton etiketi: "Arttır"
+- Her tıklamada sayaç değeri +1 artar
+- Sonuç anında ekranda ve localStorage'ta güncellenir
+- Klavye: Enter veya Space ile tetiklenebilir
+- ARIA: aria-label="Sayaç değerini 1 artır"
+
+### 4.3 Azalt İşlemi
+- Buton etiketi: "Azalt"
+- Her tıklamada sayaç değeri -1 azalır
+- Sonuç anında ekranda ve localStorage'ta güncellenir
+- Klavye: Enter veya Space ile tetiklenebilir
+- ARIA: aria-label="Sayaç değerini 1 azalt"
+
+### 4.4 Sıfırla İşlemi
+- Buton etiketi: "Sıfırla"
+- Sayaç değerini 0'a geri ayarlar
+- localStorage'taki değeri "0" olarak günceller
+- Klavye: Enter veya Space ile tetiklenebilir
+- ARIA: aria-label="Sayaç değerini sıfırla"
+
+### 4.5 localStorage Entegrasyonu
+- Saklanan key: "smoke_counter_value"
+- Değer her değişiklikte otomatik kaydedilir (sync)
+- Sayfa yüklendiğinde localStorage'dan değer okunur; yoksa 0 kullanılır
+- localStorage okuma hatası: konsola error düşülür, 0 ile devam edilir
+- localStorage yazma hatası: konsola error düşülür, kullanıcıya mesaj gösterilmez (smoke test olduğu için minimal hata yönetimi)
+
+### 4.6 Başlangıç Durumu (Boş/Erik Durum)
+- localStorage boşsa veya geçersiz değer içeriyorsa sayaç 0 olarak başlar
+- Boş state için özel bir ekran yoktur — sayaç her zaman görünür durumdadır
+
+## 5. Veri Modeli
+
+### CounterState Entity
+```
+alan: value
+tip: number
+aciklama: Mevcut sayaç değeri, tam sayi, negatif destekler
+varsayilan: 0
+storage_key: "smoke_counter_value"
+```
+
+### localStorage Schema
+```
+Key: "smoke_counter_value"
+Value (JSON string): "0" veya herhangi bir tam sayi string'i
+Ornek: "42", "-7", "0"
+```
+
+## 6. UI/UX Gereksinimler
+
+### 6.1 Design System
+- **Aesthetic:** Minimal — temiz, sade, odak noktası sayaç değerinde
+- **Renk Paleti:**
+  - Primary (buton arka plan): #2563EB (mavi)
+  - Primary Hover: #1D4ED8
+  - Secondary (sıfırla butonu): #6B7280 (gri)
+  - Secondary Hover: #4B5563
+  - Background: #F9FAFB (açık gri)
+  - Surface (kart): #FFFFFF
+  - Text Primary: #111827 (koyu)
+  - Text Secondary: #6B7280
+  - Border: #E5E7EB
+  - Success: #10B981
+  - Error: #EF4444
+  - Warning: #F59E0B
+- **Tipografi:**
+  - Heading font: Inter, system-ui fallback (Google Fonts)
+  - Body font: Inter, system-ui fallback
+  - Sayaç değeri: 72px, bold, #111827
+  - Buton metni: 16px, semibold, #FFFFFF
+- **Icon Library:** Lucide React
+  - Plus ikonu: Arttır butonu
+  - Minus ikonu: Azalt butonu
+  - RotateCcw ikonu: Sıfırla butonu
+
+### 6.2 Spacing & Components
+- Spacing scale: 4 / 8 / 16 / 24 / 32 / 48 / 64 px
+- Container padding: 24px
+- Kart padding: 32px
+- Buton arası mesafe: 16px
+- Border radius (butonlar): 8px
+- Border radius (kart): 12px
+- Kart gölgesi: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)
+- Buton min-width: 120px
+- Buton height: 44px (touch hedefi)
+- Buton gap (flex): 16px yatay
+
+### 6.3 Layout
+- Tek kolon, dikey hizalı
+- Sayfa ortasında (flexbox center)
+- Maksimum genişlik: 400px
+- Mobilde tam genişlik, 16px horizontal padding
+- Desktop: kart şeklinde, sayfa ortasında
+
+### 6.4 Buton Stilleri
+- Varsayılan: solid background, rounded
+- Hover: darker shade
+- Focus: 2px outline (#2563EB), offset 2px, visible
+- Active: scale(0.98) transform
+- Disabled: opacity 0.5, cursor not-allowed
+
+## 7. Non-Functional Requirements
+
+### 7.1 Performans
+- İlk yükleme (Lighthouse): < 2 saniye
+- Vite bundle hedefi: < 50KB gzipped (React + app code)
+- Her işlem (arttır/azalt/sıfırla): < 16ms yanıt süresi
+- localStorage yazma: async değil, blocking (küçük değer olduğu için kabul edilebilir)
+
+### 7.2 Erişilebilirlik (WCAG 2.1 AA)
+- Tüm butonlar klavye odaklanabilir (tabindex="0" gerekmez, <button> varsayılanı yeterli)
+- Tüm butonlarda aria-label tanımlı
+- Sayı değeri ekran okuyucu dostu şekilde duyurulur (role="status" veya aria-live="polite")
+- Renk kontrastı: #2563EB on #FFFFFF = 4.8:1 (AA onaylı)
+- Focus visible: tüm interactive elementlerde outline görünür
+- Touch hedefleri: minimum 44x44px (buton height + padding)
+
+### 7.3 Tarayıcı Desteği
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+- iOS Safari 14+
+- Android Chrome 90+
+- Responsive: 320px (mobile) → 1920px (desktop)
+
+## 8. Proje Yapısı
+
+```
+smoke-prd-filter-26041636/
+├── src/
+│   ├── components/
+│   │   ├── CounterDisplay.tsx       # Sayı değerini gösteren bileşen
+│   │   ├── CounterDisplay.module.css
+│   │   ├── CounterControls.tsx      # Arttır, Azalt, Sıfırla butonları
+│   │   └── CounterControls.module.css
+│   ├── hooks/
+│   │   └── useCounter.ts           # Sayaç state + localStorage mantığı
+│   ├── utils/
+│   │   └── storage.ts              # localStorage get/set helper
+│   ├── types/
+│   │   └── index.ts                # TypeScript tipler
+│   ├── App.tsx
+│   ├── App.css
+│   ├── main.tsx
+│   └── index.css                   # Global stiller, CSS reset
+├── public/
+│   └── vite.svg
+├── index.html
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
+```
+
+## 9. Window State (testing/dogfood için)
+
+```typescript
+window.app = {
+  state: 'idle',          // idle | loading | error
+  counter: {
+    value: number,        // Mevcut sayaç değeri
+    stored: boolean       // localStorage'a kayıtlı mı
+  },
+  version: '1.0.0'        // Uygulama versiyonu
+}
+```
+
+## 10. Ekranlar
+
+| # | Ekran Adı | Tür | Açıklama |
+|---|-----------|-----|----------|
+| 1 | Ana Sayfa (Sayaç) | app | Tek sayfa: sayaç değeri + 3 kontrol butonu. Tüm işlevsellik bu ekranda. localStorage otomatik senkron. |
+| 2 | Hata Durumu | error | localStorage okuma/yazma başarısız olursa görünür. Basit Türkçe hata mesajı ve tekrar deneme butonu. |
+| 3 | Bilgi Mesajı | toast | Sayaç sıfırlandığında kısa bir bilgi toast mesajı görünür ve 2 saniyede kaybolur. |
+
+## 11. Deployment
+
+- Build: `npm run build` → dist/ klasörü
+- Servis: `npx serve dist` veya herhangi bir static file server
+- Port: 3000 varsayılan
+- Tek makine üzerinde çalışır, environment variable gerekmez
+
+## 12. Smoke Test Kapsamı
+
+Bu proje bir smoke test olduğu için aşağıdaki sınırlar geçerlidir:
+- Maksimum 1 story üretilecektir
+- Test coverage beklenmez (unit test, e2e test yok)
+- CI/CD pipeline yok
+- Monitoring/logging yok
+- Error boundary yok (hata varsa klasik React error screen)
+- Deployment sadece local static server üzerinden
+
+Generate a SEPARATE screen design for EVERY page, view, modal, dialog, tab panel, and settings screen described in this PRD. Do NOT skip ANY screen — even if it seems minor.
+
+MANDATORY SCREENS:
+- If the PRD mentions "settings" or "ayarlar" → generate a Settings screen
+- If the PRD mentions tabs or bottom navigation → generate EACH tab view as a separate screen
+- If the PRD mentions modals (statistics, help, share, confirmation) → generate each as a separate screen
+- If the PRD mentions error states, empty states, loading states → generate those too
+- Generate at least as many screens as there are distinct views/pages/modals in the PRD
+
+All visible text must be in Turkish. Use a dark, modern theme.
